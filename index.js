@@ -3,10 +3,23 @@ const app = express();
 const bodyParser = require('body-parser');
 const cors = require("cors");
 const pool = require("./db");
+const path = require("path");
+const PORT = process.env.PORT || 5000;
 
+// process.env 
+// process.env.NODE_ENV => production or undefined
+// proxy for routes (localhost:5000) will be ignored when in production build
+ 
 //middleware
 app.use(cors());
 app.use(bodyParser.json()); //req.body
+
+if(process.env.NODE_ENV === "production") {
+  // server static content
+  // npm run build
+  app.use(express.static(path.join(__dirname, "client/build")))
+}
+
 
 //ROUTES//
 
@@ -82,6 +95,12 @@ app.delete("/todos/:id", async (req, res) => {
   }
 });
 
-app.listen(5000, () => {
-  console.log("server has started on port 5000");
+// Catch all 
+app.get("*", (req, res) => {
+  res.sendFile(path.join(__dirname, "client/build/index.html"))
+});
+
+
+app.listen(PORT, () => {
+  console.log(`server has started on port ${PORT}`);
 });
